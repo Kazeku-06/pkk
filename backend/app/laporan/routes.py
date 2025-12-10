@@ -13,8 +13,15 @@ import uuid
 
 def admin_required():
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
-    return user and user.role == UserRole.admin
+    if not current_user_id:
+        return False
+    try:
+        # Convert string ID back to integer for database query
+        user_id_int = int(current_user_id)
+        user = User.query.get(user_id_int)
+        return user and user.role == UserRole.admin
+    except (ValueError, TypeError):
+        return False
 
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -45,7 +52,9 @@ def save_file(file):
 def create_laporan():
     try:
         current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
+        # Convert string ID back to integer for database query
+        user_id_int = int(current_user_id)
+        user = User.query.get(user_id_int)
         
         if not user or user.role != UserRole.siswa:
             return jsonify({'error': 'Akses ditolak. Hanya siswa yang dapat membuat laporan'}), 403
@@ -99,7 +108,7 @@ def create_laporan():
         
         # Buat laporan baru
         laporan = Laporan(
-            user_id=current_user_id,
+            user_id=user_id_int,
             ruang_id=int(ruang_id),
             foto_kegiatan=foto_kegiatan_filename,
             foto_kunci=foto_kunci_filename,
@@ -126,12 +135,14 @@ def create_laporan():
 def get_my_laporan():
     try:
         current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
+        # Convert string ID back to integer for database query
+        user_id_int = int(current_user_id)
+        user = User.query.get(user_id_int)
         
         if not user or user.role != UserRole.siswa:
             return jsonify({'error': 'Akses ditolak. Hanya siswa yang dapat mengakses'}), 403
         
-        laporan_list = Laporan.query.filter_by(user_id=current_user_id).order_by(Laporan.created_at.desc()).all()
+        laporan_list = Laporan.query.filter_by(user_id=user_id_int).order_by(Laporan.created_at.desc()).all()
         
         return jsonify({
             'laporan': [laporan.to_dict() for laporan in laporan_list]

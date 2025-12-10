@@ -19,24 +19,47 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
     
-    # Configure CORS with explicit settings
+    # Configure CORS - Direct approach
     CORS(app, 
-         origins=['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'],
-         allow_headers=['Content-Type', 'Authorization', 'Access-Control-Allow-Credentials'],
+         origins=['http://localhost:5173', 'http://127.0.0.1:5173'],
+         allow_headers=['Content-Type', 'Authorization'],
          methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-         supports_credentials=True,
-         expose_headers=['Content-Type', 'Authorization'])
+         supports_credentials=True)
     
-    # Add CORS headers manually as backup
+    # Manual CORS headers as backup with debug
     @app.after_request
     def after_request(response):
         origin = request.headers.get('Origin')
-        if origin in ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000']:
-            response.headers.add('Access-Control-Allow-Origin', origin)
-            response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-            response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-            response.headers.add('Access-Control-Allow-Credentials', 'true')
+        print(f"🔍 CORS Debug - Origin: {origin}, Path: {request.path}")
+        
+        if origin in ['http://localhost:5173', 'http://127.0.0.1:5173']:
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+            response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            print(f"✅ CORS Headers added for origin: {origin}")
+        else:
+            print(f"❌ Origin not allowed: {origin}")
+        
         return response
+    
+    # Handle preflight OPTIONS requests with debug
+    @app.before_request
+    def handle_preflight():
+        if request.method == "OPTIONS":
+            origin = request.headers.get('Origin')
+            print(f"🚀 OPTIONS Request - Origin: {origin}, Path: {request.path}")
+            
+            if origin in ['http://localhost:5173', 'http://127.0.0.1:5173']:
+                response = app.make_default_options_response()
+                response.headers['Access-Control-Allow-Origin'] = origin
+                response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+                response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+                response.headers['Access-Control-Allow-Credentials'] = 'true'
+                print(f"✅ OPTIONS Response sent for: {origin}")
+                return response
+            else:
+                print(f"❌ OPTIONS Request denied for: {origin}")
     
     # Create upload directory
     upload_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', app.config['UPLOAD_FOLDER'])

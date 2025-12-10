@@ -8,8 +8,15 @@ from app import db
 
 def admin_required():
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
-    return user and user.role == UserRole.admin
+    if not current_user_id:
+        return False
+    try:
+        # Convert string ID back to integer for database query
+        user_id_int = int(current_user_id)
+        user = User.query.get(user_id_int)
+        return user and user.role == UserRole.admin
+    except (ValueError, TypeError):
+        return False
 
 @bp.route('/fasilitas', methods=['POST'])
 @jwt_required()

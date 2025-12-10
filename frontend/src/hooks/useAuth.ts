@@ -21,6 +21,7 @@ export const useAuth = () => {
   }, []);
 
   const login = (token: string, userData: User) => {
+    console.log('🔍 Login - Saving token and user data:', userData.name, userData.role);
     localStorage.setItem('access_token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
