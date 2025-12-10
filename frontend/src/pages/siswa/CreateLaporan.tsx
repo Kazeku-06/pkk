@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -46,7 +46,7 @@ export const CreateLaporan = () => {
   const watchedRuangId = watch('ruang_id');
   const selectedRuang = ruangList.find(r => r.id === Number(watchedRuangId));
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (watchedRuangId) {
       setSelectedRuangId(Number(watchedRuangId));
     }

@@ -10,3 +10,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or 'storage/uploads'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    
+    # JWT Configuration
+    JWT_ACCESS_TOKEN_EXPIRES = False  # Tokens don't expire for development
+    JWT_ALGORITHM = 'HS256'

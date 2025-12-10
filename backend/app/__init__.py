@@ -19,6 +19,22 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
     
+    # JWT Error handlers
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        print(f"❌ Invalid token error: {error}")
+        return jsonify({'error': 'Invalid token'}), 422
+    
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        print(f"❌ Expired token: {jwt_payload}")
+        return jsonify({'error': 'Token has expired'}), 422
+    
+    @jwt.unauthorized_loader
+    def unauthorized_callback(error):
+        print(f"❌ Unauthorized error: {error}")
+        return jsonify({'error': 'Authorization token required'}), 422
+    
     # Configure CORS - Direct approach
     CORS(app, 
          origins=['http://localhost:5173', 'http://127.0.0.1:5173'],
