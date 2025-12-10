@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ChangeEvent } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -65,7 +65,7 @@ export const CreateLaporan = () => {
     createMutation.mutate(requestData);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'kegiatan' | 'kunci') => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>, type: 'kegiatan' | 'kunci') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
